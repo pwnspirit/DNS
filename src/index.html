@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rust DNS Checker</title>
+</head>
+<body>
+  <h2>DNS Checker</h2>
+  <input id="domain" placeholder="Enter domain" />
+  <button onclick="checkDNS()">Check</button>
+  <pre id="results"></pre>
+
+  <script>
+    async function checkDNS() {
+      const domain = document.getElementById("domain").value;
+      const res = await fetch("/lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain }),
+      });
+      const data = await res.json();
+      document.getElementById("results").innerText = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
+
