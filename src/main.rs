@@ -1,6 +1,5 @@
-
-
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_cors::Cors;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, http::header};
 use serde::{Deserialize, Serialize};
 use trust_dns_resolver::config::*;
 use trust_dns_resolver::TokioAsyncResolver;
@@ -19,11 +18,9 @@ struct DnsResult {
 #[post("/lookup")]
 async fn lookup(data: web::Json<LookupRequest>) -> impl Responder {
     let domain = data.domain.clone();
-
     let resolver = TokioAsyncResolver::tokio(ResolverConfig::default(), ResolverOpts::default());
 
     let mut results = Vec::new();
-
     let record_types = vec!["A", "AAAA", "MX", "NS", "TXT", "CNAME"];
 
     for rtype in &record_types {
@@ -64,13 +61,21 @@ async fn index() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Server running at http://localhost:8080");
+    println!("🚀 Server running on http://0.0.0.0:8080");
+
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allowed_origin("https://pwnspirit.github.io/DNS") // 🔁 Replace with your GitHub Pages URL
+            .allowed_methods(vec!["POST"])
+            .allowed_headers(vec![header::CONTENT_TYPE])
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .service(index)
             .service(lookup)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }

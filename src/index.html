@@ -12,11 +12,17 @@
   <script>
     async function checkDNS() {
       const domain = document.getElementById("domain").value;
-      const res = await fetch("/lookup", {
+      const res = await fetch("https://dnschecker.pwnspirit.xyz/lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ domain }),
       });
+
+      if (!res.ok) {
+        document.getElementById("results").innerText = "Failed to fetch DNS info.";
+        return;
+      }
+
       const data = await res.json();
       document.getElementById("results").innerText = JSON.stringify(data, null, 2);
     }
